@@ -1,0 +1,123 @@
+/* Main container styling */
+.claim-form {
+  max-width: 650px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Section headers */
+.claim-form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.claim-form h3 {
+  margin-top: 30px;
+  margin-bottom: 10px;
+  color: #007BFF; /* Color to differentiate sections */
+  border-bottom: 2px solid #007BFF;
+  padding-bottom: 5px;
+}
+
+/* Form field styling */
+.claim-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.claim-form div {
+  margin-bottom: 10px;
+}
+
+.claim-form select {
+  text-align: center; /* Centers placeholder text in some browsers */
+  text-align-last: center; /* Centers selected option text */
+  appearance: none; /* Removes default dropdown arrow for custom styling */
+}
+
+.claim-form label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.claim-form input[type="text"],
+.claim-form input[type="email"],
+.claim-form input[type="date"],
+.claim-form input[type="number"],
+.claim-form input[type="file"],
+.claim-form input[type="time"],
+.claim-form textarea,
+.claim-form select {
+  width: 100%;
+  max-width: 400px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 14px;
+  text-align: center;
+}
+
+.claim-form .button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* Button styling */
+.claim-form button[type="submit"] {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px;
+  background-color: #007BFF;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.claim-form button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+/* Different background color for each section */
+.claim-form .personal-info,
+.claim-form .vehicle-info,
+.claim-form .driver-info,
+.claim-form .accident-info,
+.claim-form .bank-details {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #e9ecef;
+  margin-bottom: 20px;
+}
+
+.claim-form .personal-info {
+  background-color: #e0f7fa; /* Light blue */
+}
+
+.claim-form .vehicle-info {
+  background-color: #fce4ec; /* Light pink */
+}
+
+.claim-form .driver-info {
+  background-color: #f3e5f5; /* Light purple */
+}
+
+.claim-form .accident-info {
+  background-color: #fff3e0; /* Light orange */
+}
+
+.claim-form .bank-details {
+  background-color: #e8f5e9; /* Light green */
+}

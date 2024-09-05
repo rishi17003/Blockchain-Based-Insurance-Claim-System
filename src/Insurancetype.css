@@ -1,0 +1,24 @@
+.insurance-type-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .insurance-type-container h2 {
+    margin-bottom: 20px;
+  }
+  
+  .insurance-type-buttons {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  
+  .insurance-type-buttons .btn {
+    flex-basis: 48%;
+    margin-bottom: 20px;
+  }
