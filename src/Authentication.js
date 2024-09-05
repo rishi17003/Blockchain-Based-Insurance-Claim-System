@@ -16,23 +16,39 @@ const Authenticate = () => {
     const [user, setUser] = useState(null);
 
     function onCaptchVerify() {
-        if (!window.recaptchaVerifier) {
+        if(!window.recaptchaVerifier) {
             window.recaptchaVerifier = new RecaptchaVerifier(
-                'recaptcha-container', // Correct usage of the 'recaptcha-container' ID
-                {
-                    size: 'invisible', // Can be 'normal' or 'invisible'
-                    callback: (response) => {
-                        // reCAPTCHA solved, allow signInWithPhoneNumber.
-                        onSignup();
-                    },
-                    'expired-callback': () => {
-                        toast.error("Recaptcha expired, please try again.");
-                    },
+                auth, 'recaptcha-container', {
+                'size': 'invisible',
+                'callback': (response) => {
+                  // reCAPTCHA solved, allow signInWithPhoneNumber.
+                    onSignup();
+                  // ...
                 },
-                auth // Passing the auth instance as required
-            );
+                'expired-callback': () => {
+                  // Response expired. Ask user to solve reCAPTCHA again.
+                  // ...
+                  toast.error("Recaptcha expired, please try again.");
+                }
+              });
         }
     }
+
+    // function onCaptchVerify() {
+    //     if (!window.recaptchaVerifier) {
+    //       window.recaptchaVerifier = new RecaptchaVerifier(
+    //         "recaptcha-container",
+    //         {
+    //           size: "invisible",
+    //           callback: (response) => {
+    //             onSignup();
+    //           },
+    //           "expired-callback": () => {},
+    //         },
+    //         auth
+    //       );
+    //     }
+    //   }
 
     function onSignup() {
         setLoading(true);
