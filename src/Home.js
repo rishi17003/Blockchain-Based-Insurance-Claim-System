@@ -1,9 +1,71 @@
-import React from 'react';
-import './App.css';
+import React,{useEffect, useState} from 'react';
+import './App1.css';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function Home() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+  const [showLoginDropdown, setShowLoginDropdown] = useState(false);
+
+  // useEffect(() => {
+  //   // Check if the user is authenticated
+  //   axios.get('http://localhost:5000/api/protected', { withCredentials: true })
+  //     .then(response => {
+  //       setIsLoggedIn(true);
+  //     })
+  //     .catch(() => {
+  //       setIsLoggedIn(false);
+  //     });
+  // }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.get('http://localhost:5000/api/protected', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(response => {
+        setIsLoggedIn(true);
+      })
+      .catch(() => {
+        setIsLoggedIn(false);
+      });
+    }
+  }, []);
+
+
+  // const handleLogout = () => {
+  //   axios.post('http://localhost:5000/api/logout', {}, { withCredentials: true })
+  //     .then(() => {
+  //       setIsLoggedIn(false);
+  //       navigate('/');
+  //     });
+  // };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    navigate('/');
+  };
+
+  const handleFileClaimClick = () => {
+    navigate('/insurance'); // Adjust the route to the insurance selection page
+  };
+
+  const handleLoginOptionClick = (option) => {
+    if (option === 'user') {
+      navigate('/login/user');
+    } else if (option === 'company') {
+      navigate('/login/company');
+    }
+  };
+
+  const handleSignupClick = (option) => {
+    navigate('/signup')
+  };
+
   return (
-    
     <div className="App">
       <header className="header">
         <div className="logo">
@@ -11,8 +73,29 @@ function Home() {
           <span>SafeChain Insurance</span>
         </div>
         <div className="auth-buttons">
-          <button className="btn btn-secondary">Sign Up</button>
-          <button className="btn btn-secondary">Login</button>
+           {/* Login Button with Dropdown */}
+           {isLoggedIn ? (
+            <>
+              <button className="btn btn-secondary" onClick={handleLogout}>Logout</button>
+            </>
+          ):(
+          <>  
+           <div className="dropdown">
+            <button className="btn btn-secondary" onClick={() => setShowLoginDropdown(!showLoginDropdown)}>
+              Login
+            </button>
+            {showLoginDropdown && (
+              <div className="dropdown-menu">
+                <button className="dropdown-item" onClick={() => handleLoginOptionClick('user')}>Login as User</button>
+                <button className="dropdown-item" onClick={() => handleLoginOptionClick('company')}>Login as Company</button>
+              </div>
+            )}
+          </div>
+            <button className="btn btn-secondary" onClick={handleSignupClick}>
+              Sign Up
+            </button>
+            </>
+            )}
         </div>
       </header>
 
@@ -20,7 +103,7 @@ function Home() {
         <div className="hero-content"> 
           <h1>Secure Your Future with SafeChain Insurance</h1>
           <p>Experience the power of blockchain for transparent and efficient claims processing.</p>
-          <button className="btn btn-primary" onClick={() => window.location.href = "/file-claim"}>File a Claim</button> 
+          <button className="btn btn-primary" onClick={handleFileClaimClick}>File a Claim</button> 
         </div>
         <div className="hero-image">
           <img src="/logo192.png" alt="SafeChain Insurance - Secure and Reliable" />
@@ -31,17 +114,20 @@ function Home() {
         <div className="container">
           <h2>About SafeChain Insurance</h2>
           <p>
-            In recent years, the insurance industry has faced numerous challenges related to transparency, efficiency, and trust. Traditional insurance models often suffer from inefficiencies, fraud, and lack of trust among stakeholders.
+            SafeChain Insurance is designed to address core challenges in the insurance industry, such as transparency, efficiency, and trust.
+            Traditional insurance models often struggle with inefficiencies, fraud, and a lack of stakeholder confidence.
           </p>
           <p>
-            To address these issues, SafeChain Insurance proposes a "Decentralized Insurance Network Using Blockchain." The system leverages blockchain technology to create a transparent and tamper-proof environment for handling insurance claims, reducing fraud, and enhancing efficiency. 
+            SafeChain Insurance tackles these issues by introducing a decentralized network powered by blockchain technology.
           </p>
-          <p>
-            Customers initiate claim requests through an integrated platform, where they are required to share KYC details for identity verification. Once verified, customers upload necessary documents to support their claims. These documents are authenticated using external APIs and validated against insurer-specific guidelines embedded in smart contracts.
-          </p>
-          <p>
-            The blockchain network checks the existence of policies to prevent double-dipping fraud, ensuring that claims are not submitted to multiple insurers simultaneously. Upon successful validation, claims are recorded on the blockchain, and payouts are automatically triggered. The system also incorporates a dispute resolution mechanism, where flagged discrepancies are addressed through arbitration to maintain fairness and integrity.
-          </p>
+          <h3>Key Features:</h3>
+          <ul>
+            <li><strong>Claim Initiation:</strong> Customers start the process by sharing KYC details for identity verification.</li>
+            <li><strong>Document Verification:</strong> Necessary documents are uploaded and authenticated through external APIs, validated against smart contract guidelines.</li>
+            <li><strong>Fraud Prevention:</strong> The blockchain network ensures no double-dipping by checking for existing policies before claim approval.</li>
+            <li><strong>Automated Payouts:</strong> Once validated, claims are securely recorded on the blockchain, triggering automatic payouts.</li>
+            <li><strong>Dispute Resolution:</strong> The system includes a mechanism to address any discrepancies, maintaining fairness and integrity.</li>
+          </ul>
         </div>
       </section>
 
@@ -49,14 +135,14 @@ function Home() {
         <div className="container">
           <h2>Our Objectives</h2>
           <ul>
-            <li><strong>Enhance Transparency:</strong> Provide a transparent system where all parties can access and verify transaction records.</li>
-            <li><strong>Reduce Fraud:</strong> Implement immutable records and smart contracts to minimize fraudulent activities.</li>
-            <li><strong>Lower Costs:</strong> Decrease administrative and operational costs by automating claims processing and policy management.</li>
-            <li><strong>Improve Efficiency:</strong> Streamline processes through automation and real-time data sharing.</li>
+            <li><strong>Enhance Transparency:</strong> Ensure all parties can access and verify transaction records within a transparent system.</li>
+            <li><strong>Reduce Fraud:</strong> Use immutable records and smart contracts to minimize fraudulent activities.</li>
+            <li><strong>Lower Costs:</strong> Automate claims processing and policy management to decrease administrative and operational expenses.</li>
+            <li><strong>Improve Efficiency:</strong> Streamline processes through automation and real-time data sharing for faster and more efficient service.</li>
           </ul>
         </div>
       </section>
-
+      
       <section className="benefits">
         <div className="container">
           <h2>Benefits</h2>
