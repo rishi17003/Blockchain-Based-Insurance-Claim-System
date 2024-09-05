@@ -1,0 +1,81 @@
+/* Container for the signup form */
+.signup-page {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #f9f9f9;  /* Light background color to match the theme */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Subtle shadow for modern look */
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+/* Heading style */
+.signup-page h2 {
+    margin-bottom: 20px;
+    color: #007BFF;  /* Primary blue color for headings */
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+/* Form styling */
+.signup-page form {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+/* Label styling */
+.signup-page label {
+    margin-bottom: 8px;
+    color: #333;  /* Dark text for contrast */
+    font-weight: bold;
+    display: block;
+    text-align: left;
+}
+
+/* Input and select field styling */
+.signup-page input,
+.signup-page select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;  /* Soft border color for input fields */
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+    background-color: #fff;  /* White background for inputs */
+}
+
+/* Input focus state */
+.signup-page input:focus,
+.signup-page select:focus {
+    outline: none;
+    border-color: #007BFF;  /* Blue border on focus to match the theme */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);  /* Blue shadow on focus */
+}
+
+/* Button styling */
+.signup-page button {
+    padding: 12px;
+    background-color: #007BFF;  /* Primary blue button color */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+/* Button hover state */
+.signup-page button:hover {
+    background-color: #0056b3;  /* Darker blue on hover */
+}
+
+/* Responsive design adjustments */
+@media (max-width: 768px) {
+    .signup-page {
+        margin: 20px;
+        padding: 20px;
+    }
+}
