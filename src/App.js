@@ -1,24 +1,27 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import './App.css';
-
 import Home from './Home';
-import InsuranceTypeSelection from './InsuranceTypeSelection';
+import InsuranceTypeSelection from './InsuranceTypeSelection'; 
+import KYCPage from './KYCPage';
 import ClaimForm from './ClaimForm'; 
+import Authentication from './Authentication';
+import Signup from './Signup';
+import Login from './Login'
 
 function App() {
   return (
     <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/file-claim" element={<InsuranceTypeSelection />} />
-          <Route path="/file-claim/vehicle" element={<ClaimForm type="Vehicle" />} />
-          <Route path="/file-claim/health" element={<ClaimForm type="Health" />} />
-          <Route path="/file-claim/life" element={<ClaimForm type="Life" />} />
-          <Route path="/file-claim/travel" element={<ClaimForm type="Travel" />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/signup" element={<Signup/>} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/login/user" element={<Login userType="user" />} />
+        <Route path="/login/company" element={<Login userType="company" />} />
+        <Route path="/insurance" element={<InsuranceTypeSelection />} />
+        <Route path="/kyc/:insuranceType" element={<KYCPage />} />
+        <Route path="/claim/:insuranceType" element={<ClaimForm />} />
+        <Route path="/Authentication" element={<Authentication />} />
+      </Routes>
     </Router>
   );
 }
