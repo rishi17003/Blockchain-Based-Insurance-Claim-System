@@ -1,18 +1,30 @@
 // // server/controllers/verifyController.js
 
-const { VehicleInsurance } = require('../models/InsuranceModel.js');
+const { VehicleInsurance, HealthInsurance, LifeInsurance, TravelInsurance } = require('../models/InsuranceModel.js');
 
 const verifyUser = async (req, res) => {
-  const { name, phoneNumber, insuranceCompany, insuranceType } = req.body;
+  const { name, phoneNumber, insuranceCompany, insurancePolicyid, insuranceType } = req.body;
 
   let InsuranceModel;
-  if (insuranceType === 'vehicle') {
-    InsuranceModel = VehicleInsurance;
+  switch (insuranceType) {
+    case 'vehicle':
+      InsuranceModel = VehicleInsurance;
+      break;
+    case 'health':
+      InsuranceModel = HealthInsurance;
+      break;
+    case 'life':
+      InsuranceModel = LifeInsurance;
+      break;
+    case 'travel':
+      InsuranceModel = TravelInsurance;
+      break;
+    default:
+      return res.status(400).json({ success: false, message: 'Invalid insurance type.' });
   }
-  // Add logic for other types (health, life, etc.)
 
   try {
-    const policy = await InsuranceModel.findOne({ name, phoneNumber, insuranceCompany });
+    const policy = await InsuranceModel.findOne({ name, phoneNumber, insuranceCompany,insurancePolicyid });
     if (policy) {
       res.json({ success: true, message: `${insuranceType.charAt(0).toUpperCase() + insuranceType.slice(1)} insurance in ${insuranceCompany} for Mr/Ms ${name} exists.` });
     } else {
