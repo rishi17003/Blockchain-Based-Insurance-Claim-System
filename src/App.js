@@ -6,7 +6,8 @@ import KYCPage from './KYCPage';
 import ClaimForm from './ClaimForm'; 
 import Authentication from './Authentication';
 import Signup from './Signup';
-import Login from './Login'
+import Login from './Login';
+import TrackClaim from './TrackClaim';
 
 function App() {
   return (
@@ -21,8 +22,10 @@ function App() {
         <Route path="/kyc/:insuranceType" element={<KYCPage />} />
         <Route path="/claim/:insuranceType" element={<ClaimForm />} />
         <Route path="/Authentication" element={<Authentication />} />
+        <Route path="/track-claim" element={<TrackClaim />} /> 
       </Routes>
     </Router>
+    
   );
 }
 
