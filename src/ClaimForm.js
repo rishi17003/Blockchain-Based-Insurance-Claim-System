@@ -1,9 +1,282 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import './claim_form.css';
-import { useParams } from 'react-router-dom';
+import { useParams,useLocation } from 'react-router-dom';
+import { requestAccounts, interactWithHealthContract, interactWithLifeContract, interactWithTravelContract, interactWithVehicleContract } from './healthcontractService';
+import { create as ipfsHttpClient } from 'ipfs-http-client';
+import axios from 'axios';
+
+const ipfs = ipfsHttpClient({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
 
 const ClaimForm = () => {
   const { insuranceType } = useParams();
+  const [firAttachment, setFirAttachment] = useState(null);
+
+  useEffect(() => {
+    // Ensure user account is connected
+    requestAccounts();
+  }, []);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        // Upload the file to IPFS and get the hash
+        const result = await ipfs.add(file);
+        setFirAttachment(result.path);  // Store the IPFS hash
+        console.log('Uploaded to IPFS:', result.path);
+      } catch (error) {
+        console.error('Error uploading file to IPFS:', error);
+      }
+    }
+  };
+  // const location = useLocation();
+  // const companyName = location.state?.insuranceCompany || "";
+
+  const handleHealthSubmit = async (e) => {
+    e.preventDefault();
+  
+    const policyDetails = {
+      companyName: e.target.companyName?.value || "",
+      policyNumber: e.target.policyNumber?.value || "",
+      policyHolderName: e.target.policyHolderName?.value || "",
+      phoneNumber: e.target.phoneNumber?.value || "",
+      holderAddress: e.target.holderAddress?.value || "",
+      dob: e.target.dob?.value || "",
+      gender: e.target.gender?.value || "",
+    };
+  
+    const medicalDetails = {
+      diseaseDetails: e.target.disease?.value || "",
+      diseaseDuration: parseInt(e.target.diseaseDuration?.value) || 0,
+      previousHospitalizedRecord: e.target.previousHospitalizedDate?.value || "None",
+      doctorDetails: e.target.doctorName?.value || "",
+      treatmentAmountSpent: parseInt(e.target.treatmentAmountSpent?.value) || 0,
+      hospitalName: e.target.hospitalName?.value || "",
+      hospitalAddress: e.target.hospitalAddress?.value || "",
+      hasOtherPolicy: e.target.otherPolicy?.value.toLowerCase() === "yes" ? "yes" : "no",
+      icuSurgeryDetails: e.target.icuSurgeryDetails?.value || "None",
+      firAttachment: firAttachment || "",
+    };
+  
+    const bankDetails = {
+      accountNumber: e.target.bankAccountNumber?.value || "",
+      bankName: e.target.bankName?.value || "",
+      panNumber: e.target.panNumber?.value || "",
+      ifscNumber: e.target.bankIfscCode?.value || "",
+    };
+  
+    try {
+      // Call the updated smart contract method with structs
+      console.log(policyDetails.companyName);
+      console.log(policyDetails);
+      console.log(medicalDetails);
+      console.log(bankDetails);
+      const tx = await interactWithHealthContract(policyDetails, medicalDetails, bankDetails,policyDetails.companyName);
+      // if (!tx) {
+      //   alert("Network switch might have failed. Please try again.");
+      //   return;
+      // }
+      await tx.wait(); // Wait for the transaction to be mined
+      
+      await sendClaimToBackend('Health', policyDetails.companyName, policyDetails.policyNumber);
+      // console.log(policyDetails.companyName, policyDetails.policyNumber);
+      alert("Claim submitted successfully!");
+    } catch (error) {
+      console.error("Error filing claim:", error);
+      // alert("Error filing claim, please try again.");
+    }
+  };  
+
+  const handleLifeSubmit = async (e) => {
+    e.preventDefault();
+
+    const policyDetails = {
+      companyName: e.target.companyName?.value || "",
+      policyNumber: e.target.policyNumber?.value || "",
+      policyHolderName: e.target.name?.value || "",
+      dob: e.target.dob?.value || "",
+      gender: e.target.gender?.value || "",
+      ageonDeath: parseInt(e.target.ageOnDeath?.value) || 0,
+      dateofDeath: e.target.dateOfDeath?.value || "",
+      timeOfDeath: e.target.timeOfDeath?.value || "",
+      causeOfDeath: e.target.causeOfDeath?.value || "",
+      placeOfDeath: e.target.placeOfDeath?.value || ""
+    };
+
+    const nomineeDetails = {
+      nomineeName: e.target.nomineeName?.value || "",
+      nomineeDob: e.target.nomineeDob?.value || "",
+      nomineegender: e.target.nomineegender?.value || "",
+      relationshipWithDeceased: e.target.relationshipWithDeceased?.value || "",
+      currentAddress: e.target.currentAddress?.value || "",
+      phonenumber: e.target.phoneNumber?.value || ""
+    };
+  
+    const medicalDetails = {
+      natureofIllness: e.target.illness?.value || "",
+      dateofDiagnosis: e.target.dateOfDiagnosis?.value || "",
+      treatmentTaken: e.target.treatmentTaken?.value || "None",
+      firAttachment: firAttachment || "N/A", // Ensure a file name is passed or empty string
+      doctorDetails: e.target.doctorName?.value || "",
+      hospitalName: e.target.hospitalName?.value || "",
+      hospitalAddress: e.target.hospitalAddress?.value || "",
+      hasOtherPolicy: e.target.otherPolicy?.value.toLowerCase() === "yes" ? "yes" : "no",
+    };
+  
+    const bankDetails = {
+      accountNumber: e.target.accountNumber?.value || "",
+      bankName: e.target.bankName?.value || "",
+      panNumber: e.target.pan?.value || "", 
+      ifscNumber: e.target.ifscCode?.value || ""
+    };
+  
+    // Log the details to verify correctness
+    console.log("Policy Details:", policyDetails);
+    console.log("Nominee Details:", nomineeDetails);
+    console.log("Medical Details:", medicalDetails);
+    console.log("Bank Details:", bankDetails);
+
+    try {
+      const tx = await interactWithLifeContract(policyDetails, nomineeDetails, medicalDetails, bankDetails,policyDetails.companyName);
+      await tx.wait();
+
+      await sendClaimToBackend('Life', policyDetails.companyName, policyDetails.policyNumber);
+      alert("Claim submitted successfully!");
+    } catch (error) {
+      console.error("Error filing claim:", error);
+      alert("Error filing claim, please try again.");
+    }
+  };
+ 
+
+  const handleVehicleSubmit = async (e) => {
+    e.preventDefault();
+  
+    const policyDetails = {
+      companyName: e.target.companyName?.value || "",
+      policyNumber: e.target.policyNumber?.value || "",
+      policyHolderName: e.target.policyHolderName?.value || "",
+      phoneNumber: e.target.phone?.value || "",
+      holderAddress: e.target.address?.value || "",
+      district: e.target.district?.value || "",
+      pinCode: e.target.pinCode?.value || "",
+      email: e.target.email?.value || "",
+      panNo: e.target.pan?.value || "",
+      aadhar: e.target.aadhar?.value || "",
+      yearlyIncome: e.target.yearlyIncome?.value || "",
+      occupation: e.target.occupation?.value || "",
+      dob: e.target.dob?.value || "",
+      gender: e.target.gender?.value || "",
+      // insuranceCompany: e.target.companyName?.value || "",
+      familyMembers: parseInt(e.target.familyMembers?.value) || 0,
+      membersOver18: parseInt(e.target.membersAbove18?.value) || 0,
+      membersDrive: parseInt(e.target.driversInFamily?.value) || 0,
+      usage: e.target.usage?.value || "",
+      haveClaimedInYear: e.target.claimsLast2Years?.value || "",
+      averageKM: e.target.averageKms?.value || "",
+      numberOfVehicle: parseInt(e.target.noOfVehicles?.value) || 0,
+      antitheftDevice: e.target.antiTheftDevice?.value || ""
+    };
+
+    const vehicleDetails = {
+      vehiclRegistrationNo: e.target.regNo?.value || "",
+      vehicleModel: e.target.model?.value || "",
+      dateOfRegistration: e.target.dateOfReg?.value || "",
+      mileage: e.target.mileage?.value || "",
+      kms:e.target.kms?.value || "",
+      chassisNo:e.target.chassisNo?.value || "",
+      engineNo: e.target.engineNo?.value || "",
+      classOfVehicle: e.target.classOfVehicle?.value || ""
+    }
+  
+    const driverDetails = {
+      driverName: e.target.driverName?.value || "",
+      driverAddress: e.target.driverAddress?.value || "",
+      relationshipWithDriver: e.target.driverIs?.value || "",
+      driverGender: e.target.gender?.value || "",
+      wasDriverDrunk: e.target.underInfluence?.value || "",
+      drivingLicenseNo: e.target.licenseNo?.value || "",
+      licenseIssueAuthority: e.target.issuingAuthority?.value || "",
+      dateOfExpiry: e.target.expiryDate?.value || "",
+      typeOfLicense: e.target.licenseType?.value || "",
+      detailsOfSuspension: e.target.endorsements?.value || "",
+      licenseTemporary: e.target.temporaryLicense?.value || ""
+    };
+
+    const accidentDetails = {
+      dateOfAccident: e.target.accidentDate?.value || "",
+      timeOfAccident: e.target.accidentTime?.value || "",
+      location: e.target.location?.value || "",
+      descriptionOfAccident: e.target.description?.value || "",
+      thirdPartyResponsible: e.target.thirdPartyLiable?.value || "",
+      detailOfThirdParty: e.target.thirdPartyDetails?.value || "",
+      reportedToPolice: e.target.reportedToPolice?.value || "",
+      policeDetails: e.target.policeDetails?.value || "",
+      repairCost: e.target.repairCost?.value || "",
+      supportingDocument: e.target.supportingDocuments?.value || "NA"
+    };
+  
+    const bankDetails = {
+      accountNumber: e.target.bankAccountNumber?.value || "",
+      bankName: e.target.bankName?.value || "",
+      panNumber: e.target.panNumber?.value || "",
+      ifscNumber: e.target.bankIfscCode?.value || "",
+    };
+  
+    try {
+
+      // console.log(policyDetails);
+      // console.log(vehicleDetails);
+      // console.log(driverDetails);
+      // console.log(accidentDetails);
+      // console.log(bankDetails);
+      // Call the updated smart contract method with structs
+      const tx = await interactWithVehicleContract(policyDetails, vehicleDetails, driverDetails, accidentDetails, bankDetails,policyDetails.companyName);
+      await tx.wait(); // Wait for the transaction to be mined
+  
+      await sendClaimToBackend('Vehicle', policyDetails.companyName, policyDetails.policyNumber);
+      alert("Claim submitted successfully!");
+    } catch (error) {
+      console.error("Error filing claim:", error);
+      alert("Error filing claim, please try again.");
+    }
+  }; 
+
+  const sendClaimToBackend = async (insuranceType, companyName, policyNumber) => {
+    const token = localStorage.getItem('token');
+    const claimData = { insuranceType, companyName, policyNumber };
+    console.log("Claim Data to send:", claimData); 
+  
+    try {
+      await axios.post('http://localhost:5000/api/claim', claimData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log('Claim saved to backend successfully.');
+    } catch (error) {
+      if (error.response) {
+        console.error('Backend error response:', error.response.data);
+      } else {
+        console.error('Error saving claim in backend:', error);
+      }
+    }
+  };
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if(insuranceType === 'health'){
+      handleHealthSubmit(e);
+    }
+    else if(insuranceType === 'life'){
+      handleLifeSubmit(e);
+    }
+    else if(insuranceType === 'vehicle'){
+      handleVehicleSubmit(e);
+    }
+    // else{
+    //   handleTravelSubmit(e);
+    // }
+  };  
 
   const renderFormFields = () => {
     switch (insuranceType) {
@@ -14,7 +287,7 @@ const ClaimForm = () => {
             <div className='personal-info'>
             <div>
               <label>Name:</label>
-              <input type="text" name="name" required />
+              <input type="text" name="policyHolderName" required />
             </div>
             <div>
               <label>Company Name:</label>
@@ -27,6 +300,10 @@ const ClaimForm = () => {
             <div>
               <label>Address:</label>
               <input type="text" name="address" required />
+            </div>
+            <div>
+                <label>Date of Birth:</label>
+                <input type="date" name="dob" required />
             </div>
             <div>
               <label>District:</label>
@@ -309,104 +586,104 @@ const ClaimForm = () => {
           <>
             <h3 className='personal-info'>Personal Information</h3>
             <div className='personal-info'>
-      <div>
-        <label>Name:</label>
-        <input type="text" name="name" required />
-      </div>
-      <div>
-        <label>Company Name:</label>
-        <input type="text" name="companyName" required />
-      </div>
-      <div>
-        <label>Policy Number:</label>
-        <input type="text" name="policyNumber" required />
-      </div>
-      <div>
-        <label>Phone Number:</label>
-        <input type="text" name="phoneNumber" required />
-      </div>
-      <div>
-        <label>Current Address:</label>
-        <textarea name="currentAddress" required></textarea>
-      </div>
-      <div>
-        <label>Date of Birth:</label>
-        <input type="date" name="dob" required />
-      </div>
-      <div>
-        <label>Gender:</label>
-        <select name="gender" required>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-      </div>
-      <h3 className='driver-info'>Disease Information</h3>
-      <div className='driver-info'>
-      <div>
-        <label>Disease:</label>
-        <input type="text" name="disease" required />
-      </div>
-      <div>
-        <label>Disease Duration (in days):</label>
-        <input type="number" name="diseaseDuration" required />
-      </div>
-      <div>
-        <label>Previous Hospitalized Date (if any):</label>
-        <input type="date" name="previousHospitalizedDate" />
-      </div>
-      </div>
-      <h3 className='accident-info'>Doctor Details</h3>
-      <div className='accident-info'>
-      <div>
-        <label>Doctor Name:</label>
-        <input type="text" name="doctorName" required />
-      </div>
-      <div>
-        <label>Treatment Amount Spent:</label>
-        <input type="number" name="treatmentAmountSpent" required />
-      </div>
-      <div>
-        <label>Hospital Name:</label>
-        <input type="text" name="hospitalName" required />
-      </div>
-      <div>
-        <label>Hospital Address:</label>
-        <textarea name="hospitalAddress" required></textarea>
-      </div>
-      <div>
-        <label>Do you have any other policy?</label>
-        <input type="text" name="otherPolicy" required />
-      </div>
-      <div>
-        <label>ICU Surgery Details:</label>
-        <textarea name="icuSurgeryDetails"></textarea>
-      </div>
-      <div>
-          <label>Supporting Documents:</label>
-          <input type="file" name="supportingDocuments" />
-        </div>
-      </div>
-      <h3 className='bank-details'>Bank Account Details</h3>
-      <div className='bank-details'>
-      <div>
-        <label>Bank Account Number:</label>
-        <input type="text" name="bankAccountNumber" required />
-      </div>
-      <div>
-        <label>Bank Name:</label>
-        <input type="text" name="bankName" required />
-      </div>
-      <div>
-        <label>PAN Number:</label>
-        <input type="text" name="panNumber" required />
-      </div>
-      <div>
-        <label>Bank IFSC Code:</label>
-        <input type="text" name="bankIfscCode" required />
-      </div>
-      </div>
+              <div>
+                <label>Name:</label>
+                <input type="text" name="policyHolderName" required />
+              </div>
+              <div>
+                <label>Company Name:</label>
+                <input type="text" name="companyName" required />
+              </div>
+              <div>
+                <label>Policy Number:</label>
+                <input type="text" name="policyNumber" required />
+              </div>
+              <div>
+                <label>Phone Number:</label>
+                <input type="text" name="phoneNumber" required />
+              </div>
+              <div>
+                <label>Current Address:</label>
+                <textarea name="currentAddress" required></textarea>
+              </div>
+              <div>
+                <label>Date of Birth:</label>
+                <input type="date" name="dob" required />
+              </div>
+              <div>
+                <label>Gender:</label>
+                <select name="gender" required>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <h3 className='driver-info'>Disease Information</h3>
+            <div className='driver-info'>
+              <div>
+                <label>Disease:</label>
+                <input type="text" name="disease" required />
+              </div>
+              <div>
+                <label>Disease Duration (in days):</label>
+                <input type="number" name="diseaseDuration" required />
+              </div>
+              <div>
+                <label>Previous Hospitalized Date (if any):</label>
+                <input type="date" name="previousHospitalizedDate" />
+              </div>
+            </div>
+            <h3 className='accident-info'>Doctor Details</h3>
+            <div className='accident-info'>
+              <div>
+                <label>Doctor Name:</label>
+                <input type="text" name="doctorName" required />
+              </div>
+              <div>
+                <label>Treatment Amount Spent:</label>
+                <input type="number" name="treatmentAmountSpent" required />
+              </div>
+              <div>
+                <label>Hospital Name:</label>
+                <input type="text" name="hospitalName" required />
+              </div>
+              <div>
+                <label>Hospital Address:</label>
+                <textarea name="hospitalAddress" required></textarea>
+              </div>
+              <div>
+                <label>Do you have any other policy?</label>
+                <input type="text" name="otherPolicy" required />
+              </div>
+              <div>
+                <label>ICU Surgery Details:</label>
+                <textarea name="icuSurgeryDetails"></textarea>
+              </div>
+              <div>
+                <label>Supporting Documents:</label>
+                <input type="file" name="supportingDocuments" />
+              </div>
+            </div>
+            <h3 className='bank-details'>Bank Account Details</h3>
+            <div className='bank-details'>
+              <div>
+                <label>Bank Account Number:</label>
+                <input type="text" name="bankAccountNumber" required />
+              </div>
+              <div>
+                <label>Bank Name:</label>
+                <input type="text" name="bankName" required />
+              </div>
+              <div>
+                <label>PAN Number:</label>
+                <input type="text" name="panNumber" required />
+              </div>
+              <div>
+                <label>Bank IFSC Code:</label>
+                <input type="text" name="bankIfscCode" required />
+              </div>
+            </div>
           </>
         );
       case 'life':
@@ -420,6 +697,10 @@ const ClaimForm = () => {
           <label>Name:</label>
           <input type="text" name="name" required />
         </div>
+        <div>
+            <label>Company Name:</label>
+            <input type="text" name="companyName" required />
+      	</div>
         <div>
           <label>Policy Number:</label>
           <input type="text" name="policyNumber" required />
@@ -472,7 +753,7 @@ const ClaimForm = () => {
         </div>
         <div>
               <label>Gender:</label>
-              <select name="gender" required>
+              <select name="nomineegender" required>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
                 <option value="other">Other</option>
@@ -488,7 +769,7 @@ const ClaimForm = () => {
         </div>
         <div>
           <label>Phone Number:</label>
-          <input type="tel" name="phoneNumber" required />
+          <input type="text" name="phoneNumber" required />
         </div>
       </div>
       </div>
@@ -510,7 +791,7 @@ const ClaimForm = () => {
         </div>
         <div>
           <label>FIR:</label>
-          <input type="text" name="fir" required />
+          <input type="file" name="fir" />
         </div>
         <div>
           <label>Doctor Name:</label>
@@ -527,10 +808,6 @@ const ClaimForm = () => {
         <div>
           <label>Do you have any other policy?</label>
           <input type="text" name="otherPolicy" required />
-        </div>
-        <div>
-          <label>Supporting Documents:</label>
-          <input type="file" name="supportingDocuments" />
         </div>
       </div>
       </div>
@@ -708,7 +985,7 @@ const ClaimForm = () => {
   return (
     <div className="claim-form">
       <h2>{insuranceType.charAt(0).toUpperCase() + insuranceType.slice(1)} Insurance Claim Form</h2>
-      <form>
+      <form onSubmit={handleSubmit}>
         {renderFormFields()}
         <div className="button-container">
         <button type="submit">Submit Claim</button>
