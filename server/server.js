@@ -2,11 +2,11 @@
 
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const User = require('./models/User');
+const Claim = require('./models/Claim');
 const bcrypt = require('bcrypt'); 
 const verifyRoute = require('./routes/verifyRoute');
 // const signupRoute = require('./routes/signupRoute');
@@ -124,6 +124,42 @@ app.post('/api/logout', (req, res) => {
 app.get('/api/protected', authenticateToken, (req, res) => {
   res.json({ message: 'This is a protected route', user: req.user });
 });
+
+
+app.post('/api/claim', authenticateToken, async (req, res) => {
+  console.log(req.body); 
+  const { insuranceType, companyName, policyNumber } = req.body;
+  
+  if (!insuranceType || !companyName || !policyNumber) {
+    return res.status(400).json({ success: false, message: 'All fields are required' });
+  }
+  try {
+    const newClaim = new Claim({
+      userId: req.user.userId,
+      insuranceType,
+      companyName,
+      policyNumber,
+    });
+
+    await newClaim.save();
+    res.json({ success: true, message: 'Claim filed successfully' });
+  } catch (error) {
+    console.error('Error filing claim:', error.message);
+    res.status(500).json({ success: false, message: `Failed to file claim: ${error.message}` });
+  }
+});
+
+
+app.get('/api/claims', authenticateToken, async (req, res) => {
+  try {
+    const claims = await Claim.find({ userId: req.user.userId });
+    res.json({ success: true, claims });
+  } catch (error) {
+    console.error('Error fetching claims:', error.message);
+    res.status(500).json({ success: false, message: `Failed to fetch claims: ${error.message}` });
+  }
+});
+
 
 // Start the server
 const PORT = process.env.PORT || 5000;
