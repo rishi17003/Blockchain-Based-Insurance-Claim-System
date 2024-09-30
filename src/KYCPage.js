@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './kyc.css';
 import { useNavigate,useParams } from 'react-router-dom';
+// import { checkAndSwitchLICNetwork, checkAndSwitchNetwork} from './healthcontractService';
 
 const KYCPage = () => {
   const [name, setName] = useState('');
@@ -37,6 +38,7 @@ const KYCPage = () => {
 const handleSubmit = (event) => {
   event.preventDefault();
   if (verificationMessage.includes('exists')) {
+    // const companyName = insuranceCompany;
     navigate(`/claim/${insuranceType.toLowerCase()}`);
   }
 };
@@ -70,7 +72,6 @@ const handleSubmit = (event) => {
     </div>
   );
 };
-
 export default KYCPage;
 
 
@@ -186,4 +187,3 @@ export default KYCPage;
 // }
 
 // export default KYCPage;
-
