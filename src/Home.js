@@ -17,7 +17,8 @@ function Home() {
   //     .catch(() => {
   //       setIsLoggedIn(false);
   //     });
-  // }, []);
+  // }, []);cd server 
+  
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -51,6 +52,10 @@ function Home() {
 
   const handleFileClaimClick = () => {
     navigate('/insurance'); // Adjust the route to the insurance selection page
+  };
+
+  const handleTrackClaimClick = () => {
+    navigate('/track-claim'); // Route to track claims
   };
 
   const handleLoginOptionClick = (option) => {
@@ -103,7 +108,10 @@ function Home() {
         <div className="hero-content"> 
           <h1>Secure Your Future with SafeChain Insurance</h1>
           <p>Experience the power of blockchain for transparent and efficient claims processing.</p>
-          <button className="btn btn-primary" onClick={handleFileClaimClick}>File a Claim</button> 
+          <button className="btn btn-primary" onClick={handleFileClaimClick}>File a Claim</button>
+          {isLoggedIn && (
+            <button className="btn btn-primary" onClick={handleTrackClaimClick}>Track Your Claim</button>
+          )} 
         </div>
         <div className="hero-image">
           <img src="/logo192.png" alt="SafeChain Insurance - Secure and Reliable" />
