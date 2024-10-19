@@ -1,11 +1,26 @@
 import React, {useState, useEffect} from 'react';
 import './claim_form.css';
-import { useParams,useLocation } from 'react-router-dom';
+import { useParams} from 'react-router-dom';
 import { requestAccounts, interactWithHealthContract, interactWithLifeContract, interactWithTravelContract, interactWithVehicleContract } from './healthcontractService';
-import { create as ipfsHttpClient } from 'ipfs-http-client';
 import axios from 'axios';
+import { create as ipfsHttpClient } from 'ipfs-http-client';
 
-const ipfs = ipfsHttpClient({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
+const projectId = '08671f09b43898692d36';
+const projectSecret = '75bbd947450c4bc2a053c18d83a47e8cb1579e794197fddf564125a4a581542d';
+//const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64');
+const jwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI3ODdhYTA5MS0xZmEyLTRiMjctOTQyOC0zMWY3MWIzOTNhNDQiLCJlbWFpbCI6InJpc2hpa2F0a2FyMjcxQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaW5fcG9saWN5Ijp7InJlZ2lvbnMiOlt7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6IkZSQTEifSx7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6Ik5ZQzEifV0sInZlcnNpb24iOjF9LCJtZmFfZW5hYmxlZCI6ZmFsc2UsInN0YXR1cyI6IkFDVElWRSJ9LCJhdXRoZW50aWNhdGlvblR5cGUiOiJzY29wZWRLZXkiLCJzY29wZWRLZXlLZXkiOiIwODY3MWYwOWI0Mzg5ODY5MmQzNiIsInNjb3BlZEtleVNlY3JldCI6Ijc1YmJkOTQ3NDUwYzRiYzJhMDUzYzE4ZDgzYTQ3ZThjYjE1NzllNzk0MTk3ZmRkZjU2NDEyNWE0YTU4MTU0MmQiLCJleHAiOjE3NjAwODE1Njl9.zmZWCXTLLKALgPs-b02FyoK6peifwyMEZe37PXvCFTk';
+
+const JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI3ODdhYTA5MS0xZmEyLTRiMjctOTQyOC0zMWY3MWIzOTNhNDQiLCJlbWFpbCI6InJpc2hpa2F0a2FyMjcxQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaW5fcG9saWN5Ijp7InJlZ2lvbnMiOlt7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6IkZSQTEifSx7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6Ik5ZQzEifV0sInZlcnNpb24iOjF9LCJtZmFfZW5hYmxlZCI6ZmFsc2UsInN0YXR1cyI6IkFDVElWRSJ9LCJhdXRoZW50aWNhdGlvblR5cGUiOiJzY29wZWRLZXkiLCJzY29wZWRLZXlLZXkiOiIwODY3MWYwOWI0Mzg5ODY5MmQzNiIsInNjb3BlZEtleVNlY3JldCI6Ijc1YmJkOTQ3NDUwYzRiYzJhMDUzYzE4ZDgzYTQ3ZThjYjE1NzllNzk0MTk3ZmRkZjU2NDEyNWE0YTU4MTU0MmQiLCJleHAiOjE3NjAwODE1Njl9.zmZWCXTLLKALgPs-b02FyoK6peifwyMEZe37PXvCFTk';
+
+// const ipfs = ipfsHttpClient({
+//   host: 'api.pinata.cloud',
+//   port: 443,
+//   protocol: 'https',
+//   headers: {
+//     authorization: `Bearer ${jwt}`,
+//   },
+// });
+
 
 const ClaimForm = () => {
   const { insuranceType } = useParams();
@@ -16,19 +31,19 @@ const ClaimForm = () => {
     requestAccounts();
   }, []);
 
-  const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      try {
-        // Upload the file to IPFS and get the hash
-        const result = await ipfs.add(file);
-        setFirAttachment(result.path);  // Store the IPFS hash
-        console.log('Uploaded to IPFS:', result.path);
-      } catch (error) {
-        console.error('Error uploading file to IPFS:', error);
-      }
-    }
-  };
+  // const handleFileChange = async (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     try {
+  //       // Upload the file to IPFS and get the hash
+  //       const result = await ipfs.pinning.upload(file);
+  //       setFirAttachment(result.path);  // Store the IPFS hash
+  //       console.log('Uploaded to IPFS:', result.path);
+  //     } catch (error) {
+  //       console.error('Error uploading file to IPFS:', error);
+  //     }
+  //   }
+  // };
   // const location = useLocation();
   // const companyName = location.state?.insuranceCompany || "";
 
@@ -40,7 +55,7 @@ const ClaimForm = () => {
       policyNumber: e.target.policyNumber?.value || "",
       policyHolderName: e.target.policyHolderName?.value || "",
       phoneNumber: e.target.phoneNumber?.value || "",
-      holderAddress: e.target.holderAddress?.value || "",
+      holderAddress: e.target.currentAddress?.value || "",
       dob: e.target.dob?.value || "",
       gender: e.target.gender?.value || "",
     };
@@ -55,7 +70,7 @@ const ClaimForm = () => {
       hospitalAddress: e.target.hospitalAddress?.value || "",
       hasOtherPolicy: e.target.otherPolicy?.value.toLowerCase() === "yes" ? "yes" : "no",
       icuSurgeryDetails: e.target.icuSurgeryDetails?.value || "None",
-      firAttachment: firAttachment || "",
+      firAttachment: firAttachment || "NA",
     };
   
     const bankDetails = {
@@ -64,6 +79,7 @@ const ClaimForm = () => {
       panNumber: e.target.panNumber?.value || "",
       ifscNumber: e.target.bankIfscCode?.value || "",
     };
+
   
     try {
       // Call the updated smart contract method with structs
@@ -71,7 +87,37 @@ const ClaimForm = () => {
       console.log(policyDetails);
       console.log(medicalDetails);
       console.log(bankDetails);
-      const tx = await interactWithHealthContract(policyDetails, medicalDetails, bankDetails,policyDetails.companyName);
+
+      // const ipfsResult = await ipfs.add(JSON.stringify(claimData));
+      // const ipfsCid = ipfsResult.path;
+
+      const claimData = { policyDetails, medicalDetails, bankDetails };
+
+      let apiEndpoint;
+      if (policyDetails.companyName === 'maxlife') {
+          apiEndpoint = 'http://127.0.0.1:5001/api/v0/add'; // Example endpoint for maxlife
+      } else if (policyDetails.companyName === 'icici') {
+          apiEndpoint = 'http://127.0.0.1:5002/api/v0/add'; // Example endpoint for icici
+      }
+
+      const formData = new FormData();
+      const blob = new Blob([JSON.stringify(claimData)], { type: 'application/json' });
+      formData.append('file', blob);
+      // const formData1= new FormData();
+      // const blob1=new Blob(medicalDetails.firAttachment,{type:'application/json'});
+      // formData1.append('file',blob1);
+
+      const response = await axios.post(apiEndpoint, formData, {
+        headers: {
+          // 'Authorization': `Bearer ${JWT_TOKEN}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const ipfsCid = response.data.Hash;  // Get CID from the response
+      console.log('Uploaded to IPFS, CID:', ipfsCid);
+
+      const tx = await interactWithHealthContract(policyDetails, medicalDetails, bankDetails,policyDetails.companyName,ipfsCid);
       // if (!tx) {
       //   alert("Network switch might have failed. Please try again.");
       //   return;
@@ -153,9 +199,9 @@ const ClaimForm = () => {
     e.preventDefault();
   
     const policyDetails = {
-      companyName: e.target.companyName?.value || "",
+      //companyName: e.target.companyName?.value || "",
       policyNumber: e.target.policyNumber?.value || "",
-      policyHolderName: e.target.policyHolderName?.value || "",
+      policyHolderName: e.target.name?.value || "",
       phoneNumber: e.target.phone?.value || "",
       holderAddress: e.target.address?.value || "",
       district: e.target.district?.value || "",
@@ -167,23 +213,23 @@ const ClaimForm = () => {
       occupation: e.target.occupation?.value || "",
       dob: e.target.dob?.value || "",
       gender: e.target.gender?.value || "",
-      // insuranceCompany: e.target.companyName?.value || "",
+      insuranceCompany: e.target.companyName?.value || "",
       familyMembers: parseInt(e.target.familyMembers?.value) || 0,
       membersOver18: parseInt(e.target.membersAbove18?.value) || 0,
       membersDrive: parseInt(e.target.driversInFamily?.value) || 0,
-      usage: e.target.usage?.value || "",
-      haveClaimedInYear: e.target.claimsLast2Years?.value || "",
       averageKM: e.target.averageKms?.value || "",
       numberOfVehicle: parseInt(e.target.noOfVehicles?.value) || 0,
-      antitheftDevice: e.target.antiTheftDevice?.value || ""
+      antitheftDevice: e.target.antiTheftDevice?.value || "",
+      haveClaimedInYear: e.target.claimsLast2Years?.value || "",
+      usage: e.target.usage?.value || "",
     };
 
     const vehicleDetails = {
-      vehiclRegistrationNo: e.target.regNo?.value || "",
+      vehicleRegistrationNo: e.target.regNo?.value || "",
       vehicleModel: e.target.model?.value || "",
       dateOfRegistration: e.target.dateOfReg?.value || "",
       mileage: e.target.mileage?.value || "",
-      kms:e.target.kms?.value || "",
+      km:e.target.kms?.value || "",
       chassisNo:e.target.chassisNo?.value || "",
       engineNo: e.target.engineNo?.value || "",
       classOfVehicle: e.target.classOfVehicle?.value || ""
@@ -231,14 +277,14 @@ const ClaimForm = () => {
       // console.log(accidentDetails);
       // console.log(bankDetails);
       // Call the updated smart contract method with structs
-      const tx = await interactWithVehicleContract(policyDetails, vehicleDetails, driverDetails, accidentDetails, bankDetails,policyDetails.companyName);
+      const tx = await interactWithVehicleContract(policyDetails, vehicleDetails, driverDetails, accidentDetails, bankDetails,policyDetails.insuranceCompany);
       await tx.wait(); // Wait for the transaction to be mined
   
-      await sendClaimToBackend('Vehicle', policyDetails.companyName, policyDetails.policyNumber);
+      await sendClaimToBackend('Vehicle', policyDetails.insuranceCompany, policyDetails.policyNumber);
       alert("Claim submitted successfully!");
     } catch (error) {
       console.error("Error filing claim:", error);
-      alert("Error filing claim, please try again.");
+      // alert("Error filing claim, please try again.");
     }
   }; 
 
@@ -287,7 +333,7 @@ const ClaimForm = () => {
             <div className='personal-info'>
             <div>
               <label>Name:</label>
-              <input type="text" name="policyHolderName" required />
+              <input type="text" name="name" required />
             </div>
             <div>
               <label>Company Name:</label>
@@ -298,12 +344,12 @@ const ClaimForm = () => {
               <input type="text" name="policyNumber" required />
             </div>
             <div>
-              <label>Address:</label>
-              <input type="text" name="address" required />
-            </div>
-            <div>
                 <label>Date of Birth:</label>
                 <input type="date" name="dob" required />
+            </div>
+            <div>
+              <label>Address:</label>
+              <input type="text" name="address" required />
             </div>
             <div>
               <label>District:</label>
@@ -407,10 +453,10 @@ const ClaimForm = () => {
               <label>Reg No:</label>
               <input type="text" name="regNo" required />
             </div>
-            <div>
+            {/* <div>
               <label>Make:</label>
               <input type="text" name="make" required />
-            </div>
+            </div> */}
             <div>
               <label>Model:</label>
               <input type="text" name="model" required />
